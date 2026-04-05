@@ -55,7 +55,7 @@ fun UpdateScreen(
                     }
                 
                 if (result != null) {
-                    val currentVersion = "0.0.3"
+                    val currentVersion = "0.0.4"
                     val latestVersion = result.tagName.removePrefix("v")
                     
                     if (isNewerVersion(latestVersion, currentVersion)) {
