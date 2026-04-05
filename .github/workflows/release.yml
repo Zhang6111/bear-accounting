@@ -60,4 +60,4 @@ jobs:
         if: success()
         run: |
           git remote add gitee https://gitee.com/zhang_mengzhao/bookkeeping-app.git
-          git push https://${{ secrets.GITEE_USERNAME }}:${{ secrets.GITEE_TOKEN }}@gitee.com/zhang_mengzhao/bookkeeping-app.git --tags
+          git push https://${{ secrets.GITEE_TOKEN }}@gitee.com/zhang_mengzhao/bookkeeping-app.git --tags
