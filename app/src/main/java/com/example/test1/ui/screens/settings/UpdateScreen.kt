@@ -124,7 +124,7 @@ fun UpdateScreen(
             )
             
             Text(
-                "当前版本: 0.0.3",
+                "当前版本: 0.0.4",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
