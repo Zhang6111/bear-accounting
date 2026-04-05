@@ -1,6 +1,7 @@
 package com.example.test1.ui.screens.statistics
 
 import android.content.Intent
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -16,7 +17,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -29,6 +33,8 @@ import com.example.test1.domain.model.TransactionType
 import com.example.test1.ui.components.CategoryIcons
 import com.example.test1.ui.theme.ExpenseRed
 import com.example.test1.ui.theme.IncomeGreen
+import java.text.SimpleDateFormat
+import java.util.*
 
 enum class TimeRange(val label: String) {
     TODAY("今天"),
@@ -107,13 +113,19 @@ fun StatisticsScreen(
 
                     if (uiState.expenseByCategory.isNotEmpty()) {
                         item {
-                            CategoryChartCard(title = "支出分类", data = uiState.expenseByCategory, categories = uiState.categories, total = uiState.totalExpense)
+                            PieChartCard(title = "支出分类", data = uiState.expenseByCategory, categories = uiState.categories, total = uiState.totalExpense)
                         }
                     }
 
                     if (uiState.incomeByCategory.isNotEmpty()) {
                         item {
-                            CategoryChartCard(title = "收入分类", data = uiState.incomeByCategory, categories = uiState.categories, total = uiState.totalIncome)
+                            PieChartCard(title = "收入分类", data = uiState.incomeByCategory, categories = uiState.categories, total = uiState.totalIncome)
+                        }
+                    }
+
+                    if (uiState.dailyExpenseData.isNotEmpty()) {
+                        item {
+                            BarChartCard(title = "每日支出", data = uiState.dailyExpenseData)
                         }
                     }
 
@@ -182,7 +194,16 @@ fun OverviewCard(income: Double, expense: Double) {
 }
 
 @Composable
-fun CategoryChartCard(title: String, data: List<Pair<Long, Double>>, categories: List<Category>, total: Double) {
+fun PieChartCard(title: String, data: List<Pair<Long, Double>>, categories: List<Category>, total: Double) {
+    val pieColors = listOf(
+        Color(0xFFFF6B8A),
+        Color(0xFFFFB4C8),
+        Color(0xFFE91E63),
+        Color(0xFFF48FB1),
+        Color(0xFFCE93D8),
+        Color(0xFFBA68C8)
+    )
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -192,42 +213,94 @@ fun CategoryChartCard(title: String, data: List<Pair<Long, Double>>, categories:
         Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
             Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(12.dp))
-            data.sortedByDescending { it.second }.take(5).forEach { (categoryId, amount) ->
-                val category = categories.find { it.id == categoryId }
-                val percentage = if (total > 0) (amount / total * 100) else 0.0
-                StatisticsCategoryProgressItem(category = category, amount = amount, percentage = percentage)
+
+            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier.size(120.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Canvas(modifier = Modifier.fillMaxSize()) {
+                        var startAngle = -90f
+                        val sortedData = data.sortedByDescending { it.second }.take(6)
+                        sortedData.forEachIndexed { index, (_, amount) ->
+                            val sweepAngle = if (total > 0) (amount / total * 360).toFloat() else 0f
+                            drawArc(
+                                color = pieColors[index % pieColors.size],
+                                startAngle = startAngle,
+                                sweepAngle = sweepAngle,
+                                useCenter = true,
+                                size = Size(size.width, size.height)
+                            )
+                            startAngle += sweepAngle
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.width(16.dp))
+
+                Column(modifier = Modifier.weight(1f)) {
+                    data.sortedByDescending { it.second }.take(5).forEachIndexed { index, (categoryId, amount) ->
+                        val category = categories.find { it.id == categoryId }
+                        val percentage = if (total > 0) (amount / total * 100) else 0.0
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Box(
+                                modifier = Modifier.size(10.dp).clip(CircleShape).background(pieColors[index % pieColors.size])
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(category?.name ?: "未知", style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(1f))
+                            Text("${String.format("%.1f", percentage)}%", style = MaterialTheme.typography.labelSmall)
+                        }
+                    }
+                }
             }
         }
     }
 }
 
 @Composable
-fun StatisticsCategoryProgressItem(category: Category?, amount: Double, percentage: Double) {
-    val defaultColor = MaterialTheme.colorScheme.primary
-    val categoryColor = remember(category?.color, defaultColor) {
-        try { Color(android.graphics.Color.parseColor(category?.color ?: "#FFB3C6")) } 
-        catch (e: Exception) { defaultColor }
-    }
+fun BarChartCard(title: String, data: List<Pair<String, Double>>) {
+    val maxValue = data.maxOfOrNull { it.second } ?: 1.0
+    val barColor = MaterialTheme.colorScheme.primary
 
-    Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
-        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Box(modifier = Modifier.size(28.dp).clip(CircleShape).background(categoryColor.copy(alpha = 0.2f)), contentAlignment = Alignment.Center) {
-                Icon(CategoryIcons.getIcon(category?.icon ?: "other"), contentDescription = null, tint = categoryColor, modifier = Modifier.size(16.dp))
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+            Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.height(16.dp))
+
+            if (data.isNotEmpty()) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().height(150.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.Bottom
+                ) {
+                    val displayData = if (data.size > 10) data.takeLast(10) else data
+                    displayData.forEach { (label, value) ->
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Bottom
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .width(24.dp)
+                                    .height(((value / maxValue) * 120).dp)
+                                    .clip(RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp))
+                                    .background(barColor.copy(alpha = 0.7f))
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                    }
+                }
             }
-            Spacer(modifier = Modifier.width(10.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(category?.name ?: "未知", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
-                Text("${String.format("%.1f", percentage)}%", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
-            }
-            Text("¥ ${String.format("%.2f", amount)}", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
         }
-        Spacer(modifier = Modifier.height(4.dp))
-        LinearProgressIndicator(
-            progress = { (percentage / 100).toFloat().coerceIn(0f, 1f) },
-            modifier = Modifier.fillMaxWidth().height(6.dp).clip(RoundedCornerShape(3.dp)),
-            color = categoryColor,
-            trackColor = categoryColor.copy(alpha = 0.2f)
-        )
     }
 }
 

@@ -21,6 +21,9 @@ data class StatisticsUiState(
     val totalExpense: Double = 0.0,
     val expenseByCategory: List<Pair<Long, Double>> = emptyList(),
     val incomeByCategory: List<Pair<Long, Double>> = emptyList(),
+    val dailyData: List<Pair<String, Double>> = emptyList(),
+    val dailyIncomeData: List<Pair<String, Double>> = emptyList(),
+    val dailyExpenseData: List<Pair<String, Double>> = emptyList(),
     val selectedTimeRange: TimeRange = TimeRange.MONTH,
     val isLoading: Boolean = false,
     val exportFile: File? = null
@@ -135,13 +138,56 @@ class StatisticsViewModel @Inject constructor(
             .mapValues { it.value.sumOf { t -> t.amount } }
             .toList()
 
+        val dailyData = calculateDailyData(transactions)
+        val dailyIncomeData = calculateDailyData(transactions.filter { it.type == TransactionType.INCOME })
+        val dailyExpenseData = calculateDailyData(transactions.filter { it.type == TransactionType.EXPENSE })
+
         _uiState.update {
             it.copy(
                 totalIncome = totalIncome,
                 totalExpense = totalExpense,
                 expenseByCategory = expenseByCategory,
-                incomeByCategory = incomeByCategory
+                incomeByCategory = incomeByCategory,
+                dailyData = dailyData,
+                dailyIncomeData = dailyIncomeData,
+                dailyExpenseData = dailyExpenseData
             )
+        }
+    }
+
+    private fun calculateDailyData(transactions: List<Transaction>): List<Pair<String, Double>> {
+        val calendar = Calendar.getInstance()
+        val range = _uiState.value.selectedTimeRange
+        
+        val days = when (range) {
+            TimeRange.TODAY -> 1
+            TimeRange.WEEK -> 7
+            TimeRange.MONTH -> 30
+            TimeRange.YEAR -> 12
+            TimeRange.ALL -> 12
+        }
+
+        return if (range == TimeRange.YEAR || range == TimeRange.ALL) {
+            val monthlyData = (0 until 12).map { month ->
+                val monthName = arrayOf("1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月")[month]
+                val total = transactions.filter { 
+                    val transCalendar = Calendar.getInstance().apply { timeInMillis = it.date }
+                    transCalendar.get(Calendar.MONTH) == month 
+                }.sumOf { it.amount }
+                monthName to total
+            }
+            monthlyData
+        } else {
+            val dailyTotals = mutableMapOf<String, Double>()
+            transactions.forEach { trans ->
+                calendar.timeInMillis = trans.date
+                val dayLabel = when (range) {
+                    TimeRange.TODAY, TimeRange.WEEK -> "${calendar.get(Calendar.DAY_OF_MONTH)}日"
+                    else -> "${calendar.get(Calendar.DAY_OF_MONTH)}日"
+                }
+                dailyTotals[dayLabel] = (dailyTotals[dayLabel] ?: 0.0) + trans.amount
+            }
+            dailyTotals.toList().sortedBy { it.first }
         }
     }
 }
