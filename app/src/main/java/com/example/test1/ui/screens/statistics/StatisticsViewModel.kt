@@ -47,7 +47,14 @@ class StatisticsViewModel @Inject constructor(
 
     fun loadData() {
         if (dataLoaded && allCategories.isNotEmpty()) {
-            _uiState.update { it.copy(isLoading = false) }
+            val filtered = filterByTimeRange(allTransactions, _uiState.value.selectedTimeRange)
+            calculateStatistics(filtered)
+            _uiState.update { 
+                it.copy(
+                    transactions = filtered,
+                    isLoading = false
+                ) 
+            }
             return
         }
         
