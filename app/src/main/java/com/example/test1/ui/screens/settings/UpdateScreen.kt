@@ -50,9 +50,9 @@ fun UpdateScreen(
             errorMessage = null
             
             try {
-                val result = withContext(Dispatchers.IO) {
-                    checkGitHubReleases("yourusername", "bear-accounting")
-                }
+                    val result = withContext(Dispatchers.IO) {
+                        checkGitHubReleases("Zhang6111", "bear-accounting")
+                    }
                 
                 if (result != null) {
                     val currentVersion = "0.0.2"
