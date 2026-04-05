@@ -14,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
@@ -25,8 +26,10 @@ import com.example.test1.domain.model.Category
 import com.example.test1.domain.model.Transaction
 import com.example.test1.domain.model.TransactionType
 import com.example.test1.ui.components.CategoryIcons
+import com.example.test1.ui.components.NeumorphicCard
 import com.example.test1.ui.theme.ExpenseRed
 import com.example.test1.ui.theme.IncomeGreen
+import com.example.test1.ui.theme.NeumorphicLight
 import com.example.test1.ui.theme.Pink400
 import java.text.SimpleDateFormat
 import java.util.*
@@ -164,7 +167,14 @@ fun QuickActionButton(
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
+            .shadow(
+                elevation = 4.dp,
+                shape = RoundedCornerShape(16.dp),
+                ambientColor = Color(0xFFD4BDC9),
+                spotColor = Color(0xFFD4BDC9)
+            )
             .clip(RoundedCornerShape(16.dp))
+            .background(NeumorphicLight)
             .clickable { onClick() }
             .padding(12.dp)
     ) {
@@ -172,7 +182,7 @@ fun QuickActionButton(
             modifier = Modifier
                 .size(52.dp)
                 .clip(CircleShape)
-                .background(color.copy(alpha = 0.12f)),
+                .background(color.copy(alpha = 0.15f)),
             contentAlignment = Alignment.Center
         ) {
             Icon(
@@ -196,24 +206,21 @@ fun MonthBalanceCard(
     expense: Double,
     balance: Double
 ) {
-    Card(
+    NeumorphicCard(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer
-        ),
-        shape = RoundedCornerShape(24.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        cornerRadius = 24.dp,
+        elevation = 10.dp
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(24.dp),
+                .padding(8.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 getCurrentMonth(),
                 style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
             )
             
             Spacer(modifier = Modifier.height(8.dp))
@@ -221,7 +228,7 @@ fun MonthBalanceCard(
             Text(
                 "结余",
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
             )
             
             Text(
@@ -240,7 +247,7 @@ fun MonthBalanceCard(
                     Text(
                         "收入",
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
                     )
                     Text(
                         "¥ ${formatAmount(income)}",
@@ -254,7 +261,7 @@ fun MonthBalanceCard(
                     Text(
                         "支出",
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
                     )
                     Text(
                         "¥ ${formatAmount(expense)}",
@@ -274,7 +281,7 @@ fun TransactionItem(
     category: Category?,
     onClick: () -> Unit
 ) {
-    val defaultColor = MaterialTheme.colorScheme.primaryContainer
+    val defaultColor = MaterialTheme.colorScheme.surface
     val categoryColor = remember(category?.color, defaultColor) {
         try {
             Color(android.graphics.Color.parseColor(category?.color ?: "#FFB3C6"))
@@ -283,15 +290,18 @@ fun TransactionItem(
         }
     }
 
-    Card(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick() },
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            .shadow(
+                elevation = 6.dp,
+                shape = RoundedCornerShape(16.dp),
+                ambientColor = Color(0xFFD4BDC9),
+                spotColor = Color(0xFFD4BDC9)
+            )
+            .clip(RoundedCornerShape(16.dp))
+            .background(NeumorphicLight)
+            .clickable { onClick() }
     ) {
         Row(
             modifier = Modifier
@@ -350,17 +360,15 @@ fun TransactionItem(
 
 @Composable
 fun EmptyTransactionsCard() {
-    Card(
+    NeumorphicCard(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-        ),
-        shape = RoundedCornerShape(24.dp)
+        cornerRadius = 24.dp,
+        elevation = 6.dp
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(32.dp),
+                .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Icon(
@@ -373,13 +381,13 @@ fun EmptyTransactionsCard() {
             Text(
                 "还没有记账记录",
                 style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 "点击下方按钮添加第一笔",
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.4f)
             )
         }
     }

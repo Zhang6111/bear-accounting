@@ -12,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
@@ -32,6 +33,8 @@ import com.example.test1.ui.screens.settings.SettingsScreen
 import com.example.test1.ui.screens.settings.FeedbackScreen
 import com.example.test1.ui.screens.settings.UpdateScreen
 import com.example.test1.ui.screens.settings.ReminderScreen
+import com.example.test1.ui.theme.NeumorphicLight
+import com.example.test1.ui.theme.NeumorphicDark
 
 @Composable
 fun AccountingNavHost(navController: NavHostController = rememberNavController()) {
@@ -169,13 +172,19 @@ fun NavBottomBar(
     onNavigate: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Surface(
-        modifier = modifier,
-        color = MaterialTheme.colorScheme.surface,
-        tonalElevation = 8.dp,
-        shadowElevation = 8.dp
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .shadow(
+                elevation = 12.dp,
+                shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+                ambientColor = NeumorphicDark,
+                spotColor = NeumorphicDark
+            )
+            .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
+            .background(NeumorphicLight)
     ) {
-            Row(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(80.dp)
@@ -204,7 +213,7 @@ fun NavBarItem(
     val interactionSource = remember { MutableInteractionSource() }
     
     val scale by animateFloatAsState(
-        targetValue = if (selected) 1.15f else 1f,
+        targetValue = if (selected) 1.1f else 1f,
         animationSpec = spring(
             dampingRatio = Spring.DampingRatioMediumBouncy,
             stiffness = Spring.StiffnessLow
@@ -229,13 +238,19 @@ fun NavBarItem(
             modifier = Modifier
                 .size(40.dp)
                 .scale(scale)
+                .shadow(
+                    elevation = if (selected) 6.dp else 0.dp,
+                    shape = RoundedCornerShape(12.dp),
+                    ambientColor = NeumorphicDark,
+                    spotColor = NeumorphicDark
+                )
+                .clip(RoundedCornerShape(12.dp))
                 .background(
                     color = if (selected) {
-                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f)
+                        NeumorphicLight
                     } else {
-                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
-                    },
-                    shape = RoundedCornerShape(12.dp)
+                        NeumorphicLight.copy(alpha = 0.5f)
+                    }
                 ),
             contentAlignment = Alignment.Center
         ) {

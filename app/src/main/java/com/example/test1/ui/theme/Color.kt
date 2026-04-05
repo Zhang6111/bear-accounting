@@ -23,3 +23,8 @@ val CardWhite = Color(0xFFFFFFFF)
 val TextPrimary = Color(0xFF3A0A1F)
 val TextSecondary = Color(0xFF7A4A5E)
 val TextHint = Color(0xFFBDBDBD)
+
+val NeumorphicBackground = Color(0xFFF5E6ED)
+val NeumorphicLight = Color(0xFFFFF5F8)
+val NeumorphicDark = Color(0xFFEDCFDC)
+val NeumorphicShadow = Color(0xFFD4BDC9)

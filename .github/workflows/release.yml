@@ -21,18 +21,43 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
+      
+      - name: Extract version from tag
+        id: version
+        run: |
+          TAG=${GITHUB_REF#refs/tags/v}
+          echo "version=$TAG" >> $GITHUB_OUTPUT
+          VERSION_CODE=$(echo $TAG | sed 's/\.//g' | sed 's/^0*//')
+          if [ -z "$VERSION_CODE" ]; then VERSION_CODE=1; fi
+          echo "version_code=$VERSION_CODE" >> $GITHUB_OUTPUT
+          
+      - name: Update version in build.gradle.kts
+        run: |
+          sed -i "s/versionCode = [0-9]*/versionCode = ${{ steps.version.outputs.version_code }}/" app/build.gradle.kts
+          sed -i "s/versionName = \"[0-9.]*\"/versionName = \"${{ steps.version.outputs.version }}\"/" app/build.gradle.kts
+          cat app/build.gradle.kts | grep -E "versionCode|versionName"
           
       - name: Build debug APK
         run: |
           chmod +x gradlew
           ./gradlew assembleDebug --no-daemon --stacktrace
          
-      - name: Upload APK
+      - name: Rename APK with version
+        run: |
+          mv app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/debug/bear-accounting-${{ steps.version.outputs.version }}.apk
+          
+      - name: Upload to GitHub Release
         uses: softprops/action-gh-release@v2
         if: success()
         with:
-          files: app/build/outputs/apk/debug/app-debug.apk
+          files: app/build/outputs/apk/debug/bear-accounting-${{ steps.version.outputs.version }}.apk
           draft: false
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Push to Gitee
+        if: success()
+        run: |
+          git remote add gitee https://${{ secrets.GITEE_USERNAME }}:${{ secrets.GITEE_TOKEN }}@gitee.com/zhang6111/bear-accounting.git
+          git push gitee --tags
