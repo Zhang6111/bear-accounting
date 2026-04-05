@@ -25,6 +25,15 @@ fun SettingsScreen(
     onNavigateToUpdate: () -> Unit,
     onNavigateToReminder: () -> Unit
 ) {
+    val context = LocalContext.current
+    val packageInfo = remember {
+        try {
+            context.packageManager.getPackageInfo(context.packageName, 0).versionName ?: "1.0.0"
+        } catch (e: Exception) {
+            "1.0.0"
+        }
+    }
+    
     Scaffold(
         topBar = {
             TopAppBar(
@@ -82,7 +91,7 @@ fun SettingsScreen(
                 SettingsItem(
                     icon = Icons.Default.Info,
                     title = "版本",
-                    subtitle = "0.0.4",
+                    subtitle = packageInfo,
                     onClick = onNavigateToUpdate
                 )
                 

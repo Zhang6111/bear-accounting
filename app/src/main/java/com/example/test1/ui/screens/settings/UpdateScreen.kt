@@ -39,6 +39,14 @@ fun UpdateScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     
+    val packageInfo = remember {
+        try {
+            context.packageManager.getPackageInfo(context.packageName, 0).versionName ?: "1.0.0"
+        } catch (e: Exception) {
+            "1.0.0"
+        }
+    }
+    
     var isChecking by remember { mutableStateOf(false) }
     var versionInfo by remember { mutableStateOf<VersionInfo?>(null) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
@@ -55,7 +63,7 @@ fun UpdateScreen(
                     }
                 
                 if (result != null) {
-                    val currentVersion = "0.0.4"
+                    val currentVersion = packageInfo
                     val latestVersion = result.tagName.removePrefix("v")
                     
                     if (isNewerVersion(latestVersion, currentVersion)) {
@@ -124,7 +132,7 @@ fun UpdateScreen(
             )
             
             Text(
-                "当前版本: 0.0.4",
+                "当前版本: $packageInfo",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
