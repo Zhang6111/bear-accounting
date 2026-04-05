@@ -55,7 +55,7 @@ fun UpdateScreen(
                     }
                 
                 if (result != null) {
-                    val currentVersion = "0.0.2"
+                    val currentVersion = "0.0.3"
                     val latestVersion = result.tagName.removePrefix("v")
                     
                     if (isNewerVersion(latestVersion, currentVersion)) {
@@ -124,7 +124,7 @@ fun UpdateScreen(
             )
             
             Text(
-                "当前版本: 0.0.2",
+                "当前版本: 0.0.3",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

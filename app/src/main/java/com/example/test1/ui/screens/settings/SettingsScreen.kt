@@ -74,7 +74,7 @@ fun SettingsScreen(
                 SettingsItem(
                     icon = Icons.Default.Info,
                     title = "版本",
-                    subtitle = "0.0.2",
+                    subtitle = "0.0.3",
                     onClick = onNavigateToUpdate
                 )
                 
