@@ -31,6 +31,7 @@ import com.example.test1.ui.screens.add.EditTransactionScreen
 import com.example.test1.ui.screens.settings.SettingsScreen
 import com.example.test1.ui.screens.settings.FeedbackScreen
 import com.example.test1.ui.screens.settings.UpdateScreen
+import com.example.test1.ui.screens.settings.ReminderScreen
 
 @Composable
 fun AccountingNavHost(navController: NavHostController = rememberNavController()) {
@@ -116,7 +117,8 @@ fun AccountingNavHost(navController: NavHostController = rememberNavController()
                 SettingsScreen(
                     onNavigateToCategory = { navController.navigate(Screen.Category.route) },
                     onNavigateToFeedback = { navController.navigate(Screen.Feedback.route) },
-                    onNavigateToUpdate = { navController.navigate(Screen.Update.route) }
+                    onNavigateToUpdate = { navController.navigate(Screen.Update.route) },
+                    onNavigateToReminder = { navController.navigate(Screen.Reminder.route) }
                 )
             }
 
@@ -128,6 +130,12 @@ fun AccountingNavHost(navController: NavHostController = rememberNavController()
 
             composable(Screen.Update.route) {
                 UpdateScreen(
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+
+            composable(Screen.Reminder.route) {
+                ReminderScreen(
                     onNavigateBack = { navController.popBackStack() }
                 )
             }

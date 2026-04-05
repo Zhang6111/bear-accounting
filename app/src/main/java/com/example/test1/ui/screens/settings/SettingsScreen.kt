@@ -22,7 +22,8 @@ import androidx.compose.ui.unit.dp
 fun SettingsScreen(
     onNavigateToCategory: () -> Unit,
     onNavigateToFeedback: () -> Unit,
-    onNavigateToUpdate: () -> Unit
+    onNavigateToUpdate: () -> Unit,
+    onNavigateToReminder: () -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -68,13 +69,20 @@ fun SettingsScreen(
                     subtitle = "检查新版本",
                     onClick = onNavigateToUpdate
                 )
+
+                SettingsItem(
+                    icon = Icons.Default.Notifications,
+                    title = "定时提醒",
+                    subtitle = "每日提醒记账",
+                    onClick = onNavigateToReminder
+                )
             }
 
             SettingsSection(title = "关于") {
                 SettingsItem(
                     icon = Icons.Default.Info,
                     title = "版本",
-                    subtitle = "0.0.3",
+                    subtitle = "0.0.4",
                     onClick = onNavigateToUpdate
                 )
                 
